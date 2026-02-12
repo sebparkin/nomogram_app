@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { View, Pressable, Text, StyleSheet, Animated } from "react-native";
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import Feather from '@expo/vector-icons/Feather';
 
 import * as colours from "@/constants/colour";
 
@@ -29,11 +31,11 @@ export default function ToggleButton({ mode, setMode }: Props) {
       <Animated.View style={[styles.slider, { left }]} />
 
       <Pressable style={styles.option} onPress={() => setMode('fill')}>
-        <Text style={styles.text}>■</Text>
+        <FontAwesome name="square" size={24} color="black" />
       </Pressable>
 
       <Pressable style={styles.option} onPress={() => setMode('mark')}>
-        <Text style={styles.text}>✕</Text>
+        <Feather name="x" size={28} color="black" />
       </Pressable>
     </View>
   );

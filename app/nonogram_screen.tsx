@@ -1,7 +1,7 @@
 import { View, Text, Image, StyleSheet, ImageSource, Pressable } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 
-import { imageUriToBinaryGrid } from "@/components/ImageUriToBinaryGrid";
+import { imageUriToBinaryGrid } from "@/core/ImageUriToBinaryGrid";
 import Nonogram from "@/components/Nonogram";
 import CircleButton from "@/components/CircleButton";
 import ToggleButton from "@/components/ToggleButton";
@@ -9,6 +9,8 @@ import { useState } from "react";
 
 export default function nonogram_screen() {
   const { uri } = useLocalSearchParams<{ uri: string }>();
+  const [mode, setMode] = useState<'fill'|'mark'>('fill');
+  const [reset, setReset] = useState(0);
 
   const imageToGridAsync = async () => {
     let grid = await imageUriToBinaryGrid(uri);
@@ -16,17 +18,17 @@ export default function nonogram_screen() {
   }
 
   const clearGrid = () => {
-    //placeholder
+    setReset(prev => prev + 1)
   }
 
-  const [mode, setMode] = useState<'fill'|'mark'>('fill');
+  
 
   return(
   <View style={styles.container}>
     {/* <Pressable onPress={imageToGridAsync}>
       <Image source={{ uri }} style={styles.image} />
     </Pressable> */}
-      <Nonogram />
+      <Nonogram mode={mode} reset={reset}/>
       <View style={styles.buttonContainer}>
         <CircleButton onPress={clearGrid}/>
         <ToggleButton mode={mode} setMode={setMode}/>

@@ -1,3 +1,5 @@
 export const buttonColour = '#FFAF68'
 export const buttonPressedColour = '#eca262ff'
 export const textColour = '#000'
+export const nonogramColour = '#333336'
+export const darkColour = '#222226'

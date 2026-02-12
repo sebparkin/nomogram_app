@@ -1,8 +1,19 @@
-import { View, StyleSheet, Pressable } from "react-native";
-import { useState } from "react";
+import { View, StyleSheet, Pressable, Text } from "react-native";
+import React, { useState } from "react";
+import Feather from '@expo/vector-icons/Feather';
 
-export default function Nonogram() {
+import * as colours from '@/constants/colour'
+
+type Props = {
+  mode: 'fill' | 'mark';
+  reset: number;
+};
+
+export default function Nonogram({ mode, reset }: Props) {
   const size = 15;
+  
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragValue, setDragValue] = useState<number | null>(null);
 
   const createEmptyGrid = () =>
     Array.from({ length: size }, () =>
@@ -11,14 +22,45 @@ export default function Nonogram() {
 
   const [grid, setGrid] = useState<number[][]>(createEmptyGrid());
 
-  const setCell = (row: number, col: number) => {
+  const startDrag = (row: number, col: number) => {
+    const current = grid[row][col];
+
+    let nextValue;
+    nextValue = 0;
+    if (current != 0) nextValue = 0;
+    else if (mode == 'fill') nextValue = 1;// fill
+    else if (mode == 'mark') nextValue = 2;                // erase
+
+    setDragValue(nextValue);
+    setIsDragging(true);
+
+    setCell(row, col, nextValue);
+  };
+
+  const setCell = (row: number, col: number, value: number) => {
     setGrid(prev => {
-      console.log(row, col)
+      //console.log(row, col, mode)
       const newGrid = prev.map(r => [...r]);
-      newGrid[row][col] = (newGrid[row][col] + 1) % 2;
+
+      newGrid[row][col] = value;
+
       return newGrid;
     });
   };
+
+  const enterCell = (row: number, col: number) => {
+    if (!isDragging || dragValue == null) return;
+    setCell(row, col, dragValue)
+  };
+
+  const stopDrag = () => {
+    setIsDragging(false);
+    setDragValue(null);
+  };
+
+  React.useEffect(() => {
+    setGrid(createEmptyGrid());
+  }, [reset])
 
   return(
     <View style={styles.board}>
@@ -29,11 +71,18 @@ export default function Nonogram() {
                 key={c}
                 style={[styles.cell, cell === 1 && styles.filled,
                 ]}
-                onPress={() => setCell(r, c)}
-                ></Pressable>
+                onPressIn={() => startDrag(r, c)}
+                onHoverIn={() => enterCell(r, c)}
+                onPressOut={stopDrag}
+                >
+                  {cell === 2 && <Feather name="x" size={24} color={colours.nonogramColour} /> }
+                </Pressable>
             ))}
           </View>
       ))}
+    <View
+    onTouchEnd={stopDrag}
+    ></View>
     </View>
   );
 }
@@ -50,12 +99,12 @@ const styles = StyleSheet.create({
     width: cell_size,
     height: cell_size,
     borderWidth: 1,
-    borderColor: '#000',
+    borderColor: colours.nonogramColour,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
   },
   filled: {
-    backgroundColor: '#000',
+    backgroundColor: colours.nonogramColour,
   },
 })
