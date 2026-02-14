@@ -6,7 +6,7 @@ export default function RootLayout() {
     <>
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" options={{title: 'Home'}} />
-      <Stack.Screen name="nonogram_screen" options={{title: 'Nonogram'}} />
+      {/* <Stack.Screen name="NonogramScreen" options={{title: 'Nonogram'}} /> */}
     </Stack>
     <StatusBar style='light' />
     </>

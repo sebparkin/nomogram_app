@@ -2,15 +2,17 @@ import { View, Pressable, StyleSheet} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as colours from '@/constants/colour';
 
+type IconName = React.ComponentProps<typeof Ionicons>["name"];
 type Props = {
     onPress: () => void;
+    name: IconName;
 };
 
-export default function CircleButton({ onPress }: Props) {
+export default function CircleButton({ onPress , name }: Props) {
     return(
         <View style={styles.circleButtonContainer}>
             <Pressable style={styles.circleButton} onPress={onPress}>
-                <Ionicons name="reload" size={38} color="#000" />
+                <Ionicons name={name} size={38} color="#000" />
             </Pressable>
         </View>
     );
