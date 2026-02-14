@@ -2,7 +2,9 @@ import { Text, View, StyleSheet } from "react-native";
 import { useState, useEffect } from "react";
 import NonogramScreen from "./NonogramScreen";
 import StartScreen from "./StartScreen";
-  import Animated, { useSharedValue, withTiming, useAnimatedStyle, withDelay, Easing } from "react-native-reanimated";
+import Animated, { useSharedValue, withTiming, useAnimatedStyle, withDelay, Easing } from "react-native-reanimated";
+
+import * as constants from '@/constants/constants'
 
 const NonogramImage = require('@/assets/images/nonogram.png');
 const DefaultImage = require('@/assets/images/mallard.jpg');
@@ -10,7 +12,7 @@ const DefaultImage = require('@/assets/images/mallard.jpg');
 export default function Index() {
 
   const [showGame, setShowGame] = useState<boolean>(false);
-  const [selectedImage, setSelectedImage] = useState<string>(DefaultImage);
+  const [selectedImage, setSelectedImage] = useState<string>(DefaultImage.uri);
 
   const startProgress = useSharedValue(0);
   const startButtonProgress = useSharedValue(0);
@@ -20,12 +22,6 @@ export default function Index() {
   useEffect(() => {
     if (showGame) {
     // Forward animation
-    startProgress.value = withDelay(
-      300,
-      withTiming(1, {
-      duration: 500,
-      easing: Easing.out(Easing.cubic)
-    }));
 
     startButtonProgress.value = withDelay(
       0,
@@ -34,41 +30,53 @@ export default function Index() {
         easing: Easing.out(Easing.cubic)})
     );
 
+    startProgress.value = withDelay(
+      1 * constants.delayTime,
+      withTiming(1, {
+      duration: 500,
+      easing: Easing.out(Easing.cubic)
+    }));
+
     gameProgress.value = withDelay(
-      600,
+      2 * constants.delayTime,
       withTiming(1, {
         duration: 500,
         easing: Easing.out(Easing.cubic)})
     );
 
     buttonProgress.value = withDelay(
-      1000,
+      3 * constants.delayTime,
       withTiming(1, {
         duration: 500,
         easing: Easing.out(Easing.cubic)})
     );
   } else {
     // Reverse animation
-    buttonProgress.value = withTiming(0, { duration: 300 });
+    buttonProgress.value = withDelay(
+      0, 
+      withTiming(0, { 
+        duration: 500,
+        easing: Easing.out(Easing.cubic)})
+    );
 
     gameProgress.value = withDelay(
-      300,
+      1 * constants.delayTime,
       withTiming(0, { 
-        duration: 400,
+        duration: 500,
         easing: Easing.out(Easing.cubic)
       })
     );
 
     startProgress.value = withDelay(
-      600,
+      2 * constants.delayTime,
       withTiming(0, { 
-        duration: 400,
+        duration: 500,
         easing: Easing.out(Easing.cubic)
        })
     );
 
     startButtonProgress.value = withDelay(
-      1000,
+      3 * constants.delayTime,
       withTiming(0, {
         duration: 500,
         easing: Easing.out(Easing.cubic)
@@ -98,7 +106,7 @@ export default function Index() {
 
 
   return(
-    <View style={[{flex: 1}]}>
+    <View style={[{flex: 1, backgroundColor: '#eee'}]}>
 
       <Animated.View style={[startStyle]}>
         <StartScreen 
@@ -117,7 +125,8 @@ export default function Index() {
           setShowGame={setShowGame} 
           selectedImage={selectedImage}
           buttonProgress={buttonProgress}
-          onBack={() => setShowGame(false)}
+          onBack={() => setShowGame(false)
+          }
         />
       </Animated.View>
     </View>

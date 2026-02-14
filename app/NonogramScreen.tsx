@@ -1,7 +1,7 @@
 import { View, Text, Image, StyleSheet, ImageSource, Pressable } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 
-import { imageUriToBinaryGrid } from "@/core/ImageUriToBinaryGrid";
+import { imageUriToBinaryGrid } from "@/scripts/ImageUriToBinaryGrid";
 import Nonogram from "@/components/Nonogram";
 import CircleButton from "@/components/CircleButton";
 import ToggleButton from "@/components/ToggleButton";
@@ -21,10 +21,12 @@ export default function NonogramScreen({showGame, setShowGame, selectedImage, bu
   const [mode, setMode] = useState<'fill'|'mark'>('fill');
   const [reset, setReset] = useState(0);
 
-  const imageToGridAsync = async () => {
-    let grid = await imageUriToBinaryGrid(selectedImage);
-    console.log(grid);
-  }
+  // const imageToGridAsync = async () => {
+  //   let grid = await imageUriToBinaryGrid(selectedImage);
+  //   console.log(grid);
+  // }; imageToGridAsync();
+
+  console.log("image: ", selectedImage);
 
   const clearGrid = () => {
     setReset(prev => prev + 1)
@@ -62,7 +64,7 @@ export default function NonogramScreen({showGame, setShowGame, selectedImage, bu
         <CircleButton onPress={() => setShowGame(false)} name="arrow-back" />
       </View>
     </Animated.View>
-    <Nonogram mode={mode} reset={reset}/>
+    <Nonogram mode={mode} reset={reset} uri={selectedImage} showGame={showGame}/>
     <Animated.View style={footerButtonStyle}>
       <View style={styles.buttonContainer}>
         <CircleButton onPress={clearGrid} name="reload"/>
