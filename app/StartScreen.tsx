@@ -7,7 +7,7 @@ import Animated, { useAnimatedStyle, SharedValue } from "react-native-reanimated
 import Button from "@/components/Button";
 
 const NonogramImage = require('@/assets/images/nonogram.png');
-const DefaultImage = require('@/assets/images/mallard.jpg');
+const DefaultImage = require('@/assets/images/mallard.png');
 
 type Props = {
   showGame: boolean,
@@ -32,7 +32,6 @@ export default function StartScreen({showGame, setShowGame, selectedImage, setSe
  
     if (!result.canceled) {
       setSelectedImage(result.assets[0].uri);
-      console.log(result)
       setShowGame(true)
     } else {
       alert('You did not select an image.');
@@ -40,8 +39,7 @@ export default function StartScreen({showGame, setShowGame, selectedImage, setSe
   };
   
   const openNonogram = () => {
-    //const imageSource = selectedImage ?? DefaultImage;
-    console.log("src", selectedImage)
+    setSelectedImage(DefaultImage.uri)
     setShowGame(true)
   }
 

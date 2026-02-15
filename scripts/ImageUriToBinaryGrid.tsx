@@ -29,7 +29,7 @@ export async function imageUriToBinaryGrid(uri: string): Promise<number[][]> {
 
   if (!ctx) throw new Error("No context");
 
-  ctx.filter = "blur(0.8px)"
+  //ctx.filter = "blur(0.8px)"
   ctx.drawImage(img, 0, 0);
 
   const data = ctx.getImageData(0, 0, size, size).data;

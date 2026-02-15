@@ -6,7 +6,8 @@ import Nonogram from "@/components/Nonogram";
 import CircleButton from "@/components/CircleButton";
 import ToggleButton from "@/components/ToggleButton";
 import { useState, useEffect } from "react";
-import Animated, { SharedValue, useAnimatedStyle } from "react-native-reanimated";
+import Animated, { SharedValue, useAnimatedStyle, Easing } from "react-native-reanimated";
+import WinScreen from "./WinScreen";
 
 type Props = {
   showGame: boolean;
@@ -14,19 +15,17 @@ type Props = {
   selectedImage: string;
   buttonProgress: SharedValue<number>;
   onBack: () => void; 
+  setGameComplete: (mode: boolean) => void;
+  gameComplete: boolean;
+  winProgress: SharedValue<number>;
 }
 
-export default function NonogramScreen({showGame, setShowGame, selectedImage, buttonProgress, onBack}: Props) {
+export default function NonogramScreen({showGame, setShowGame, selectedImage, buttonProgress, onBack, setGameComplete, gameComplete, winProgress}: Props) {
   //const { uri } = useLocalSearchParams<{ uri: string }>();
   const [mode, setMode] = useState<'fill'|'mark'>('fill');
   const [reset, setReset] = useState(0);
-
-  // const imageToGridAsync = async () => {
-  //   let grid = await imageUriToBinaryGrid(selectedImage);
-  //   console.log(grid);
-  // }; imageToGridAsync();
-
-  console.log("image: ", selectedImage);
+  const [maxRowClues, setMaxRowClues] = useState<number>(0);
+  const [maxColClues, setMaxColClues] = useState<number>(0);
 
   const clearGrid = () => {
     setReset(prev => prev + 1)
@@ -54,6 +53,13 @@ export default function NonogramScreen({showGame, setShowGame, selectedImage, bu
     opacity: buttonProgress.value,
   }));
 
+  const winStyle = useAnimatedStyle(() => ({
+    opacity: winProgress.value
+  }))
+
+  console.log(gameComplete);
+  
+
   return(
   <View style={styles.container}>
     {/* <Pressable onPress={imageToGridAsync}>
@@ -64,7 +70,16 @@ export default function NonogramScreen({showGame, setShowGame, selectedImage, bu
         <CircleButton onPress={() => setShowGame(false)} name="arrow-back" />
       </View>
     </Animated.View>
-    <Nonogram mode={mode} reset={reset} uri={selectedImage} showGame={showGame}/>
+    <View style={styles.boardContainer}>
+      <Nonogram mode={mode} reset={reset} uri={selectedImage} 
+        showGame={showGame} setGameComplete={setGameComplete}
+        maxRowClues={maxRowClues} maxColClues={maxColClues}
+        setMaxRowClues={setMaxRowClues} setMaxColClues={setMaxColClues}
+      />
+      <Animated.View style={[winStyle, {position: 'absolute'}]} pointerEvents={gameComplete ? 'auto' : 'none'}>
+        <WinScreen selectedImage={selectedImage} maxRowClues={maxRowClues} maxColClues={maxColClues}/>
+      </Animated.View>
+    </View>
     <Animated.View style={footerButtonStyle}>
       <View style={styles.buttonContainer}>
         <CircleButton onPress={clearGrid} name="reload"/>
@@ -81,6 +96,9 @@ const styles = StyleSheet.create({
     flex: 1, 
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  boardContainer: {
+    position: 'relative',
   },
   image: { 
     width: 300, 

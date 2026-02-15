@@ -1,5 +1,5 @@
-import { View, StyleSheet, Pressable, Text } from "react-native";
-import React, { useState } from "react";
+import { View, StyleSheet, Pressable, Text, SectionList } from "react-native";
+import React, { useState, useMemo } from "react";
 import Feather from '@expo/vector-icons/Feather';
 
 import { getColumnClues, getRowClues } from '@/scripts/getClues';
@@ -11,16 +11,24 @@ type Props = {
   reset: number;
   uri: string;
   showGame: boolean;
+  setGameComplete: (mode: boolean) => void;
+  maxRowClues: number;
+  maxColClues: number;
+  setMaxRowClues: (mode: number) => void;
+  setMaxColClues: (mode: number) => void;
 };
 
-export default function Nonogram({ mode, reset, uri, showGame }: Props) {
+export default function Nonogram({ mode, reset, uri, showGame, setGameComplete, maxRowClues, maxColClues, setMaxRowClues, setMaxColClues }: Props) {
   const size = 15;
   
   const [isDragging, setIsDragging] = useState(false);
   const [dragValue, setDragValue] = useState<number | null>(null);
   const [rowClues, setRowClues] = useState<number[][]>([[]]);
   const [colClues, setColClues] = useState<number[][]>([[]]);
-  
+  const [rowPaddedClues, setRowPaddedClues] = useState<number[][]>([[]]);
+  const [colPaddedClues, setColPaddedClues] = useState<number[][]>([[]]);
+  const [binaryGrid, setBinaryGrid] = useState<number[][]>([[]]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const createEmptyGrid = () =>
     Array.from({ length: size }, () =>
@@ -36,7 +44,7 @@ export default function Nonogram({ mode, reset, uri, showGame }: Props) {
     nextValue = 0;
     if (current != 0) nextValue = 0;
     else if (mode == 'fill') nextValue = 1;// fill
-    else if (mode == 'mark') nextValue = 2;                // erase
+    else if (mode == 'mark') nextValue = 2;// erase
 
     setDragValue(nextValue);
     setIsDragging(true);
@@ -46,11 +54,8 @@ export default function Nonogram({ mode, reset, uri, showGame }: Props) {
 
   const setCell = (row: number, col: number, value: number) => {
     setGrid(prev => {
-      //console.log(row, col, mode)
       const newGrid = prev.map(r => [...r]);
-
       newGrid[row][col] = value;
-
       return newGrid;
     });
   };
@@ -66,8 +71,10 @@ export default function Nonogram({ mode, reset, uri, showGame }: Props) {
   };
 
   const setClues = (binaryGrid: number[][]) => {
-    setRowClues(getRowClues(binaryGrid))
-    setColClues(getColumnClues(binaryGrid))
+    setRowClues(getRowClues(binaryGrid));
+    setColClues(getColumnClues(binaryGrid));
+    setRowPaddedClues(rowClues.map(clue => [...clue]));
+    setColPaddedClues(colClues.map(clue => [...clue]));
   };
 
   React.useEffect(() => {
@@ -76,53 +83,98 @@ export default function Nonogram({ mode, reset, uri, showGame }: Props) {
 
   React.useEffect(() => {
     const getClues = async() => {
-      let binaryGrid = await imageUriToBinaryGrid(uri);
-      setClues(binaryGrid)
+      setLoading(true);
+      const loadGrid = await imageUriToBinaryGrid(uri);
+      setBinaryGrid(loadGrid)
+      //setClues(loadGrid)
+      const rowClues = getRowClues(loadGrid);
+      const colClues = getColumnClues(loadGrid);
+      setRowClues(rowClues);
+      setColClues(colClues);
+      const rowPaddedClues = rowClues.map(clue => [...clue]);
+      const colPaddedClues = colClues.map(clue => [...clue]);
+      setRowPaddedClues(rowPaddedClues);
+      setColPaddedClues(colPaddedClues);
+      const maxRowCluesNum = Math.max(...rowClues.map(c => c.length));
+      const maxColCluesNum = Math.max(...colClues.map(c => c.length));
+      setMaxRowClues(maxRowCluesNum);
+      setMaxColClues(maxColCluesNum);
+      padAllClues(rowClues, rowPaddedClues, colPaddedClues, maxRowCluesNum, maxColCluesNum)
+      setLoading(false);
     };
-    getClues()
+    getClues();
   }, [showGame])
 
-  const maxRowClues = Math.max(...rowClues.map(c => c.length));
-  const maxColClues = Math.max(...colClues.map(c => c.length));
+  const rowCompleted = useMemo(() => {
+    return rowClues.map((target, i) => 
+      JSON.stringify(getRowClues(grid)[i]) == JSON.stringify(target)
+    );
+  }, [grid, rowClues]);
+
+  const colCompleted = useMemo(() => {
+    return colClues.map((target, i) => 
+      JSON.stringify(getColumnClues(grid)[i]) == JSON.stringify(target)
+    );
+  }, [grid, colClues]);
+  
+  const gameComplete = useMemo(() => {
+    let rowComplete = rowCompleted.every(Boolean);
+    let colComplete = colCompleted.every(Boolean);
+
+    console.log(rowComplete, colComplete);
+    if (rowComplete && colComplete) {
+      setGameComplete(true);
+    } else setGameComplete(false);
+  }, [grid]);
 
   function padClues(clues: number[], max: number) {
-    return Array(max - clues.length).fill("").concat(clues);
+    const padding = max - clues.length;
+    if (padding <= 0) {
+      return clues;  
+    } else return Array(padding).fill('').concat(clues);
   }
 
-  function padAllClues(rowClues: number[][], colClues: number[][], maxRowClues: number, maxColClues: number) {
+  function padAllClues(
+    rowClues: number[][],
+    rowPaddedClues: number[][], colPaddedClues: number[][],
+    maxRowClues: number, maxColClues: number) {
 
-    for (let i = 0; i < colClues.length; i++) {
-      colClues[i] = padClues(colClues[i], maxColClues)
+    for (let i = 0; i < colPaddedClues.length; i++) {
+      colPaddedClues[i] = padClues(colPaddedClues[i], maxColClues)
     }
 
-    for (let i = 0; i < rowClues.length; i++) {
-      rowClues[i] = padClues(rowClues[i], maxRowClues)
+    let padLength = (rowClues.length - rowPaddedClues.length) + maxColClues
+    for (let i = 0; i < padLength; i++) {
+      rowPaddedClues.unshift([])
     }
 
-  }; padAllClues(rowClues, colClues, maxRowClues, maxColClues)
+    for (let i = 0; i < rowPaddedClues.length; i++) {
+      rowPaddedClues[i] = padClues(rowPaddedClues[i], maxRowClues)
+    } 
+    console.log(colPaddedClues)
 
-  console.log(colClues)
-  
+  }; //padAllClues(rowClues, rowPaddedClues, colPaddedClues, maxRowClues, maxColClues)
+
 
   return(
     <View style={{flexDirection: 'row'}}>
-       <View>
-        {Array.from({ length: maxColClues }).map((_, i) => (
+      <View>
+        {/* {Array.from({ length: maxColClues }).map((_, i) => (
           <Text key={i} style={styles.padClue}>{""}</Text>
-        ))}
-        {rowClues.map((clue: number[], i: number) => (
-          <View style={styles.clue}>
-            <Text key={i} style={styles.clueText}>{clue.join(" ")}</Text>
+        ))} */}
+        {rowPaddedClues.map((clue: number[], i: number) => (
+          <View key={i} style={[styles.rowClue, rowCompleted[i-maxColClues] && styles.completedClue, {width: (cell_size * maxRowClues)/1.5}]}>
+            <Text style={[styles.clueText, rowCompleted[i-maxColClues] && styles.completedClueText]}>{clue.join(" ")}</Text>
           </View>
         ))}
       </View>
       <View style={styles.board}>
         <View style={{ flexDirection: "row" }}>
-          {colClues.map((clue, i) => (
+          {colPaddedClues.map((clue, i) => (
             <View key={i}>
               {clue.map((n, j) => (
-                <View style={styles.clue}>
-                  <Text key={j} style={styles.clueText}>{n}</Text>
+                <View style={[styles.colClue, colCompleted[i] && styles.completedClue]}>
+                  <Text key={j} style={[styles.clueText, colCompleted[i] && styles.completedClueText]}>{n}</Text>
                 </View>
               ))}
             </View>
@@ -150,6 +202,7 @@ export default function Nonogram({ mode, reset, uri, showGame }: Props) {
       </View>
     </View>
   );
+
 }
 
 const cell_size = 22;
@@ -164,12 +217,20 @@ const styles = StyleSheet.create({
     width: cell_size,
     height: cell_size,
     borderWidth: 1,
-    borderColor: colours.nonogramColour,
+    borderColor: '#999',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
   },
-  clue: {
+  rowClue: {
+    width: cell_size, 
+    height: cell_size,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    flexDirection: 'row', 
+    paddingRight: 5,
+  },
+  colClue: {
     width: cell_size, 
     height: cell_size,
     alignItems: 'center',
@@ -180,6 +241,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textAlignVertical: 'center',
     fontWeight: 'bold',
+  },
+  completedClue: {
+    backgroundColor: '#bbb'
+  },
+  completedClueText: {
+    backgroundColor: '#bbb',
+    color: '#666',
   },
   padClue: {
     width: cell_size, 
