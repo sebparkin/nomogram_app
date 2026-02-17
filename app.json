@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "nomogram_app",
-    "slug": "nomogram_app",
+    "name": "nonogram_app",
+    "slug": "nonogram_app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "nomogramapp",
+    "icon": "./assets/images/favicon-96x96.png",
+    "scheme": "nonogramapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "backgroundColor": "#ffffff",
@@ -25,7 +25,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/icon.png"
+      "favicon": "./assets/images/favicon-96x96.png"
     },
     "plugins": [
       "expo-router",
