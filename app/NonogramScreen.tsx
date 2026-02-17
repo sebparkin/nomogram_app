@@ -14,13 +14,12 @@ type Props = {
   setShowGame: (mode: boolean) => void;
   selectedImage: string;
   buttonProgress: SharedValue<number>;
-  onBack: () => void; 
   setGameComplete: (mode: boolean) => void;
   gameComplete: boolean;
   winProgress: SharedValue<number>;
 }
 
-export default function NonogramScreen({showGame, setShowGame, selectedImage, buttonProgress, onBack, setGameComplete, gameComplete, winProgress}: Props) {
+export default function NonogramScreen({showGame, setShowGame, selectedImage, buttonProgress, setGameComplete, gameComplete, winProgress}: Props) {
   //const { uri } = useLocalSearchParams<{ uri: string }>();
   const [mode, setMode] = useState<'fill'|'mark'>('fill');
   const [reset, setReset] = useState(0);
@@ -57,8 +56,6 @@ export default function NonogramScreen({showGame, setShowGame, selectedImage, bu
     opacity: winProgress.value
   }))
 
-  console.log(gameComplete);
-  
 
   return(
   <View style={styles.container}>

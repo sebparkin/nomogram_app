@@ -8,9 +8,8 @@ type Props = {
 
 export default function WinScreen({ selectedImage, maxRowClues, maxColClues }: Props) {
 
-  console.log(selectedImage, maxRowClues, maxColClues);
   return (
-    <Image source={{uri: selectedImage}} style={[styles.image, {top: maxColClues * 22, left: maxRowClues * 22}]} />
+    <Image source={{uri: selectedImage}} style={[styles.image, {top: maxColClues * 22, left: (maxRowClues * 22)/1.5}]} />
   )
 }
 

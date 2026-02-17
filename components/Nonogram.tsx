@@ -1,10 +1,12 @@
 import { View, StyleSheet, Pressable, Text, SectionList } from "react-native";
 import React, { useState, useMemo } from "react";
 import Feather from '@expo/vector-icons/Feather';
+import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 
 import { getColumnClues, getRowClues } from '@/scripts/getClues';
 import { imageUriToBinaryGrid } from "@/scripts/ImageUriToBinaryGrid";
 import * as colours from '@/constants/colour'
+import * as constants from '@/constants/constants'
 
 type Props = {
   mode: 'fill' | 'mark';
@@ -27,8 +29,7 @@ export default function Nonogram({ mode, reset, uri, showGame, setGameComplete, 
   const [colClues, setColClues] = useState<number[][]>([[]]);
   const [rowPaddedClues, setRowPaddedClues] = useState<number[][]>([[]]);
   const [colPaddedClues, setColPaddedClues] = useState<number[][]>([[]]);
-  const [binaryGrid, setBinaryGrid] = useState<number[][]>([[]]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [axisLock, setAxisLock] = useState<number[] | null>(null);
 
   const createEmptyGrid = () =>
     Array.from({ length: size }, () =>
@@ -65,28 +66,13 @@ export default function Nonogram({ mode, reset, uri, showGame, setGameComplete, 
     setCell(row, col, dragValue)
   };
 
-  const stopDrag = () => {
-    setIsDragging(false);
-    setDragValue(null);
-  };
-
-  const setClues = (binaryGrid: number[][]) => {
-    setRowClues(getRowClues(binaryGrid));
-    setColClues(getColumnClues(binaryGrid));
-    setRowPaddedClues(rowClues.map(clue => [...clue]));
-    setColPaddedClues(colClues.map(clue => [...clue]));
-  };
-
   React.useEffect(() => {
     setGrid(createEmptyGrid());
   }, [reset])
 
   React.useEffect(() => {
     const getClues = async() => {
-      setLoading(true);
       const loadGrid = await imageUriToBinaryGrid(uri);
-      setBinaryGrid(loadGrid)
-      //setClues(loadGrid)
       const rowClues = getRowClues(loadGrid);
       const colClues = getColumnClues(loadGrid);
       setRowClues(rowClues);
@@ -100,7 +86,6 @@ export default function Nonogram({ mode, reset, uri, showGame, setGameComplete, 
       setMaxRowClues(maxRowCluesNum);
       setMaxColClues(maxColCluesNum);
       padAllClues(rowClues, rowPaddedClues, colPaddedClues, maxRowCluesNum, maxColCluesNum)
-      setLoading(false);
     };
     getClues();
   }, [showGame])
@@ -121,7 +106,6 @@ export default function Nonogram({ mode, reset, uri, showGame, setGameComplete, 
     let rowComplete = rowCompleted.every(Boolean);
     let colComplete = colCompleted.every(Boolean);
 
-    console.log(rowComplete, colComplete);
     if (rowComplete && colComplete) {
       setGameComplete(true);
     } else setGameComplete(false);
@@ -151,17 +135,48 @@ export default function Nonogram({ mode, reset, uri, showGame, setGameComplete, 
     for (let i = 0; i < rowPaddedClues.length; i++) {
       rowPaddedClues[i] = padClues(rowPaddedClues[i], maxRowClues)
     } 
-    console.log(colPaddedClues)
+  };
 
-  }; //padAllClues(rowClues, rowPaddedClues, colPaddedClues, maxRowClues, maxColClues)
+  const pan = Gesture.Pan()
+    .minDistance(1)
+    .onBegin((e) => {
+      const r = Math.floor(e.y / constants.cellSize);
+      const c = Math.floor(e.x / constants.cellSize);
+      startDrag(r, c);
+    })
+    .onUpdate((e) => {
+      const r = Math.floor(e.y / constants.cellSize);
+      const c = Math.floor(e.x / constants.cellSize);
 
+      if (e.translationX > (constants.cellSize/4) && ! axisLock) {
+        setAxisLock([r, 0]);
+      } else if (e.translationY > (constants.cellSize/4) && ! axisLock) {
+        setAxisLock([0, c]);
+      };
+
+      if (axisLock && axisLock[0] == 0) {
+        if (r >= 0 && r < 15) enterCell(r, axisLock[1])
+      } else if (axisLock && axisLock[1] == 0) {
+        if (c >= 0 && c < 15) enterCell(axisLock[0], c)
+      } else {
+        if (
+          r >= 0 && r < 15 &&
+          c >= 0 && c < 15
+        ) {
+          enterCell(r, c);
+        }
+      }
+    })
+    .onEnd((e) => {
+      setIsDragging(false);
+      setDragValue(null);
+      setAxisLock(null);
+    });
+    
 
   return(
     <View style={{flexDirection: 'row'}}>
       <View>
-        {/* {Array.from({ length: maxColClues }).map((_, i) => (
-          <Text key={i} style={styles.padClue}>{""}</Text>
-        ))} */}
         {rowPaddedClues.map((clue: number[], i: number) => (
           <View key={i} style={[styles.rowClue, rowCompleted[i-maxColClues] && styles.completedClue, {width: (cell_size * maxRowClues)/1.5}]}>
             <Text style={[styles.clueText, rowCompleted[i-maxColClues] && styles.completedClueText]}>{clue.join(" ")}</Text>
@@ -180,29 +195,24 @@ export default function Nonogram({ mode, reset, uri, showGame, setGameComplete, 
             </View>
           ))} 
         </View>
+        <GestureDetector gesture={pan}>
+        <View>
         {grid.map((row, r) => (
             <View key={r} style={styles.row}>
               {row.map((cell, c ) => (
-                <Pressable 
-                  key={c}
-                  style={[styles.cell, cell === 1 && styles.filled,
-                  ]}
-                  onPressIn={() => startDrag(r, c)}
-                  onHoverIn={() => enterCell(r, c)}
-                  onPressOut={stopDrag}
-                  >
-                    {cell === 2 && <Feather name="x" size={24} color={colours.nonogramColour} /> }
-                  </Pressable>
+                <Pressable key={c} style={[styles.cell, cell === 1 && styles.filled]}>
+                    {cell === 2 && <Feather name="x" size={24} color={colours.nonogramColour}/>}
+                </Pressable>
               ))}
             </View>
         ))}
+        </View>
+        </GestureDetector>
       <View
-      onTouchEnd={stopDrag}
       ></View>
       </View>
     </View>
   );
-
 }
 
 const cell_size = 22;

@@ -1,15 +1,12 @@
-import { Text, View, StyleSheet } from "react-native";
 import { useState, useEffect } from "react";
 import NonogramScreen from "./NonogramScreen";
 import StartScreen from "./StartScreen";
-import Animated, { useSharedValue, withTiming, useAnimatedStyle, withDelay, Easing, ZoomIn } from "react-native-reanimated";
+import Animated, { useSharedValue, withTiming, useAnimatedStyle, withDelay, Easing} from "react-native-reanimated";
 import ConfettiCannon from 'react-native-confetti-cannon';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import * as constants from '@/constants/constants'
-import WinScreen from "./WinScreen";
-import { opacity } from "react-native-reanimated/lib/typescript/Colors";
 
-const NonogramImage = require('@/assets/images/nonogram.png');
 const DefaultImage = require('@/assets/images/mallard.png');
 
 export default function Index() {
@@ -113,13 +110,12 @@ export default function Index() {
     } else {
       winProgress.value = 0
     }
-    console.log(gameComplete)
   }, [gameComplete])
 
   const gameStyle = useAnimatedStyle(() => ({
     transform: [
       {
-        translateY: ((1 - gameProgress.value) * -600) - 600,
+        translateY: ((1 - gameProgress.value) * -600),
       },
     ],
     opacity: gameProgress.value,
@@ -143,26 +139,20 @@ export default function Index() {
   let width = screen.width;
 
   return(
-    <View style={[{flex: 1, backgroundColor: '#eee'}]}>
-
-      <Animated.View style={[startStyle]}>
+    <GestureHandlerRootView style={[{flex: 1, backgroundColor: '#eee'}]}>
+      <Animated.View style={[startStyle, {position: 'absolute', width: '100%', height: '100%'}]}>
         <StartScreen 
-          showGame={showGame}
           setShowGame={setShowGame}
-          selectedImage={selectedImage}
           setSelectedImage={setSelectedImage}
-          onStart={() => setShowGame(true)}
-          onBack={() => setShowGame(false)}
           startButtonProgress={startButtonProgress}/>
       </Animated.View>
 
-      <Animated.View style={[gameStyle]}>
+      <Animated.View style={[gameStyle, {position: 'absolute', width: '100%', height: '100%'}]}>
         <NonogramScreen 
           showGame={showGame} 
           setShowGame={setShowGame} 
           selectedImage={selectedImage}
           buttonProgress={buttonProgress}
-          onBack={() => setShowGame(false)}
           setGameComplete={setGameComplete}
           gameComplete={gameComplete}
           winProgress={winProgress}
@@ -170,18 +160,18 @@ export default function Index() {
       </Animated.View>
       {showLeftConfetti && (
         <ConfettiCannon
-          count={200}
+          count={50}
           origin={{ x: -10, y: 0 }}
           fadeOut
         />
       )}
       {showRightConfetti && (
         <ConfettiCannon
-          count={200}
+          count={50}
           origin={{ x: width + 10, y: 0 }}
           fadeOut
         />
       )}
-    </View>
+    </GestureHandlerRootView>
   )
 }

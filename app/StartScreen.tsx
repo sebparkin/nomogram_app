@@ -10,16 +10,12 @@ const NonogramImage = require('@/assets/images/nonogram.png');
 const DefaultImage = require('@/assets/images/mallard.png');
 
 type Props = {
-  showGame: boolean,
   setShowGame: (mode: boolean) => void;
-  selectedImage: string | undefined;
   setSelectedImage: (mode: string) => void;
-  onStart: () => void;
-  onBack: () => void;
   startButtonProgress: SharedValue<number>;
 }
 
-export default function StartScreen({showGame, setShowGame, selectedImage, setSelectedImage, startButtonProgress}: Props) {
+export default function StartScreen({setShowGame,setSelectedImage, startButtonProgress}: Props) {
   //const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined);
   const router = useRouter();
 

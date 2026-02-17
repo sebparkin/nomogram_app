@@ -13,6 +13,14 @@ type Props = {
 export default function ToggleButton({ mode, setMode }: Props) {
   const anim = useRef(new Animated.Value(mode === 'fill' ? 0 : 1)).current;
 
+  const toggleMode = () => {
+    if (mode == 'fill') {
+      setMode('mark')
+    } else {
+      setMode('fill')
+    }
+  }
+
   useEffect(() => {
     Animated.timing(anim, {
       toValue: mode === 'fill' ? 0 : 1,
@@ -30,11 +38,11 @@ export default function ToggleButton({ mode, setMode }: Props) {
     <View style={styles.container}>
       <Animated.View style={[styles.slider, { left }]} />
 
-      <Pressable style={styles.option} onPress={() => setMode('fill')}>
+      <Pressable style={styles.option} onPress={() => toggleMode()}>
         <FontAwesome name="square" size={24} color="black" />
       </Pressable>
 
-      <Pressable style={styles.option} onPress={() => setMode('mark')}>
+      <Pressable style={styles.option} onPress={() => toggleMode()}>
         <Feather name="x" size={28} color="black" />
       </Pressable>
     </View>
