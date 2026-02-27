@@ -7,6 +7,7 @@ import { getColumnClues, getRowClues } from '@/scripts/getClues';
 import { imageUriToBinaryGrid } from "@/scripts/ImageUriToBinaryGrid";
 import * as colours from '@/constants/colour'
 import * as constants from '@/constants/constants'
+import { useSharedValue } from "react-native-reanimated";
 
 type Props = {
   mode: 'fill' | 'mark';
@@ -29,7 +30,7 @@ export default function Nonogram({ mode, reset, uri, showGame, setGameComplete, 
   const [colClues, setColClues] = useState<number[][]>([[]]);
   const [rowPaddedClues, setRowPaddedClues] = useState<number[][]>([[]]);
   const [colPaddedClues, setColPaddedClues] = useState<number[][]>([[]]);
-  const [axisLock, setAxisLock] = useState<number[] | null>(null);
+  const axisLock = useSharedValue([-2, -2]);
 
   const createEmptyGrid = () =>
     Array.from({ length: size }, () =>
@@ -147,17 +148,17 @@ export default function Nonogram({ mode, reset, uri, showGame, setGameComplete, 
     .onUpdate((e) => {
       const r = Math.floor(e.y / constants.cellSize);
       const c = Math.floor(e.x / constants.cellSize);
-
-      if (e.translationX > (constants.cellSize/4) && ! axisLock) {
-        setAxisLock([r, 0]);
-      } else if (e.translationY > (constants.cellSize/4) && ! axisLock) {
-        setAxisLock([0, c]);
+      console.log(axisLock.value[0])
+      if (e.translationX > (constants.cellSize/4) && axisLock.value[0] == -2) {
+        axisLock.value = [r, -1];
+      } else if (e.translationY > (constants.cellSize/4) && axisLock.value[0] == -2) {
+        axisLock.value = [-1, c];
       };
 
-      if (axisLock && axisLock[0] == 0) {
-        if (r >= 0 && r < 15) enterCell(r, axisLock[1])
-      } else if (axisLock && axisLock[1] == 0) {
-        if (c >= 0 && c < 15) enterCell(axisLock[0], c)
+      if (axisLock.value[0] == -1) {
+        if (r >= 0 && r < 15) enterCell(r, axisLock.value[1])
+      } else if (axisLock.value[1] == -1) {
+        if (c >= 0 && c < 15) enterCell(axisLock.value[0], c)
       } else {
         if (
           r >= 0 && r < 15 &&
@@ -170,7 +171,7 @@ export default function Nonogram({ mode, reset, uri, showGame, setGameComplete, 
     .onEnd((e) => {
       setIsDragging(false);
       setDragValue(null);
-      setAxisLock(null);
+      axisLock.value = [-2, -2];
     });
     
 
