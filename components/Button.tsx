@@ -1,5 +1,5 @@
-import { StyleSheet, Pressable, View, Text, useWindowDimensions } from "react-native";
 import Iconify from '@expo/vector-icons/FontAwesome';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
 import * as colours from '@/constants/colour';
 

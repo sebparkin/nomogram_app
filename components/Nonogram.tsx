@@ -1,13 +1,13 @@
-import { View, StyleSheet, Pressable, Text, SectionList } from "react-native";
-import React, { useState, useMemo } from "react";
 import Feather from '@expo/vector-icons/Feather';
-import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+import React, { useMemo, useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
+import * as colours from '@/constants/colour';
+import * as constants from '@/constants/constants';
 import { getColumnClues, getRowClues } from '@/scripts/getClues';
 import { imageUriToBinaryGrid } from "@/scripts/ImageUriToBinaryGrid";
-import * as colours from '@/constants/colour'
-import * as constants from '@/constants/constants'
-import { useSharedValue } from "react-native-reanimated";
+import { useSharedValue } from 'react-native-reanimated';
 
 type Props = {
   mode: 'fill' | 'mark';

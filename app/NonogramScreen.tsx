@@ -1,12 +1,10 @@
-import { View, Text, Image, StyleSheet, ImageSource, Pressable } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { ScrollView, StyleSheet, View } from "react-native";
 
-import { imageUriToBinaryGrid } from "@/scripts/ImageUriToBinaryGrid";
-import Nonogram from "@/components/Nonogram";
 import CircleButton from "@/components/CircleButton";
+import Nonogram from "@/components/Nonogram";
 import ToggleButton from "@/components/ToggleButton";
-import { useState, useEffect } from "react";
-import Animated, { SharedValue, useAnimatedStyle, Easing } from "react-native-reanimated";
+import { useEffect, useState } from "react";
+import Animated, { SharedValue, useAnimatedStyle } from "react-native-reanimated";
 import WinScreen from "./WinScreen";
 
 type Props = {
@@ -58,7 +56,7 @@ export default function NonogramScreen({showGame, setShowGame, selectedImage, bu
 
 
   return(
-  <View style={styles.container}>
+  <ScrollView contentContainerStyle={styles.container}>
     {/* <Pressable onPress={imageToGridAsync}>
       <Image source={{ uri }} style={styles.image} />
     </Pressable> */}
@@ -83,14 +81,14 @@ export default function NonogramScreen({showGame, setShowGame, selectedImage, bu
         <ToggleButton mode={mode} setMode={setMode}/>
       </View>
     </Animated.View>
-  </View>
+  </ScrollView>
 
   );
 }
 
 const styles = StyleSheet.create({
   container: { 
-    flex: 1, 
+    flexGrow: 1, 
     alignItems: 'center',
     justifyContent: 'center',
   },

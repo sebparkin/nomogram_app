@@ -1,6 +1,6 @@
-import { View, Pressable, StyleSheet} from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import * as colours from '@/constants/colour';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 type IconName = React.ComponentProps<typeof Ionicons>["name"];
 type Props = {

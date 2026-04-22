@@ -1,10 +1,9 @@
-import { Text, View, StyleSheet } from "react-native";
-import { useState } from "react";
+import Button from "@/components/Button";
 import { Image } from "expo-image";
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import Animated, { useAnimatedStyle, SharedValue } from "react-native-reanimated";
-import Button from "@/components/Button";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import Animated, { SharedValue, useAnimatedStyle } from "react-native-reanimated";
 
 const NonogramImage = require('@/assets/images/nonogram.png');
 const DefaultImage = require('@/assets/images/mallard.png');
@@ -59,7 +58,7 @@ export default function StartScreen({setShowGame,setSelectedImage, startButtonPr
     }));
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Animated.View style={headerStyle}>
         <View style={styles.titleContainer}>
           <Text style={styles.titleText}>Create a Custom Nonogram!</Text>
@@ -74,14 +73,15 @@ export default function StartScreen({setShowGame,setSelectedImage, startButtonPr
           <Button label='Choose Example' onPress={openNonogram} icon='folder-o' />
         </View>
       </Animated.View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: 'center',
+    overflow: 'scroll',
   },
   titleContainer: {
     flex: 1 / 6,
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     borderWidth: 5,
   },
   footerContainer: {
-    flex: 1 / 2,
+    flex: 1 / 3,
     alignItems: 'center',
     paddingBottom: '5%',
     paddingTop: '3%',

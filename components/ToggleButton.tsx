@@ -1,7 +1,7 @@
-import React, { useRef, useEffect, useState } from "react";
-import { View, Pressable, Text, StyleSheet, Animated } from "react-native";
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Feather from '@expo/vector-icons/Feather';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import React, { useEffect, useRef } from "react";
+import { Animated, Pressable, StyleSheet, View } from "react-native";
 
 import * as colours from "@/constants/colour";
 
